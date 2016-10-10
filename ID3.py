@@ -73,12 +73,19 @@ class ID3Tree(object):
             self.setRoot(root)
             self.split(root,self.getTrainingData())
 
-    #TBD
-    def classify(self,instance): 
+    def classify(self,instance):
         if self.getRoot() is None:
-            raise ValueError("Tree has not been initialized.")
+            raise ValueError("Tree has not been initialized!")
         else:
-            currentNode = self.getRoot()
+            root = self.getRoot()
+            return self.getNext(root,instance)
+
+    def getNext(node,instance):
+        if node.getNext(instance) is None:
+            return node.getOutput()            
+        else:
+            node = node.getNext(instance)
+            return self.getNext(node,instance)
 
 
 class Node(object):
@@ -86,35 +93,45 @@ class Node(object):
         pass
 
     def setData(self,data):
+        # sets examples
         self.__data = data
 
     def getData(self):
+        # gets examples
         return self.__data
 
     def setChildren(self,children):
+        # sets child (should be a list)
         self.__children = children
 
     def getChildren(self):
+        # gets list of children
         return self.__children
 
     def setAttribute(self,attribute):
+        # sets attribute of the node
         self.__attribute = attribute
 
     def getAttribute(self):
+        # gets the attribute of the node
         return self.__attribute
 
-    # not sure if the set/get parent methods are necessary
-    def setParent(self,parent):
-        self.__parent = parent
-
-    def getParent(self):
-        return self.__parent
-
     def addChild(self,child):
+        # adds child to the node
         self.getChildren().append(child)
     
-    #TBD
+    def getOutput(self):
+        # gets output (most frequent occurrence of training data)
+        if self.getData() is None:
+            raise ValueError("Node is empty!")
+        else:
+            counts = np.bincount( self.getData()[:-1] )
+            return np.argmax(counts)
+
     def isPure(self):
-        pass
+        if len(np.bincount(self.getData()[:,-1])) == 1:
+            return True
+        else:
+            return False
 
 
